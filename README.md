@@ -1,34 +1,67 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Next.js + Relay + Streaming
 
-## Getting Started
+Experimenting with Next.js + Relay + Streaming setup using the
+[experimental runtime flag](https://github.com/vercel/next.js/discussions/34179).
+Currently works with a production build, but not in dev.
 
-First, run the development server:
+## Setup
 
-```bash
-npm run dev
-# or
-yarn dev
+Requires Node.js / PNPM. Clone this repo then:
+
+```shell
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Build and start the service:
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+```shell
+cd service
+pnpm build
+pnpm start
+```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+Build and start the app:
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+```shell
+cd app
+pnpm schema:download
+pnpm relay
+NODE_ENV=production pnpm build
+NODE_ENV=production pnpm start
+```
 
-## Learn More
+Visit http://localhost:3000 to see the streaming page render 🎉.
 
-To learn more about Next.js, take a look at the following resources:
+## Dev Issues
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Now start the server in dev:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```shell
+pnpm dev
+```
 
-## Deploy on Vercel
+Visit http://localhost:3000 and you should see some errors from the server,
+though the page will reconcile in hydration:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+error - ../node_modules/.pnpm/cosmiconfig@6.0.0/node_modules/cosmiconfig/dist/readFile.js:9:0
+Module not found: Can't resolve 'fs'
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Import trace for requested module:
+../node_modules/.pnpm/cosmiconfig@6.0.0/node_modules/cosmiconfig/dist/Explorer.js
+../node_modules/.pnpm/cosmiconfig@6.0.0/node_modules/cosmiconfig/dist/index.js
+../node_modules/.pnpm/babel-plugin-macros@2.8.0/node_modules/babel-plugin-macros/dist/index.js
+../node_modules/.pnpm/babel-plugin-relay@13.1.1/node_modules/babel-plugin-relay/lib/BabelPluginRelay.macro.js
+../node_modules/.pnpm/babel-plugin-relay@13.1.1/node_modules/babel-plugin-relay/macro.js
+./src/blocks/ProductList.tsx
+./src/pages/index.tsx
+```
+
+Strange because the Node.js runtime should allow `fs`, though maybe hitting
+[this limitation](https://nextjs.org/docs/messages/module-not-found) when using
+`babel-plugin-relay/macro` with incremental dev builds:
+
+> The module you're trying to import uses Node.js specific modules, for example
+> `dns`, outside of `getStaticProps` / `getStaticPaths` / `getServerSideProps`
+
+Need to investigate more.
