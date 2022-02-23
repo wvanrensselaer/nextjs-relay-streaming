@@ -1,6 +1,6 @@
 import { useLazyLoadQuery } from 'react-relay';
 import graphql from 'babel-plugin-relay/macro';
-import { ProductListQuery } from './__generated__/ProductListQuery.graphql';
+import { ProductListQuery } from '../__generated__/ProductListQuery.graphql';
 
 const PRODUCT_LIST_QUERY = graphql`
   query ProductListQuery {

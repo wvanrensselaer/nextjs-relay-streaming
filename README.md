@@ -32,6 +32,13 @@ NODE_ENV=production pnpm start
 
 Visit http://localhost:3000 to see the streaming page render 🎉.
 
+## Compiler Relay Issues
+
+Using the new `compiler.relay` option per https://nextjs.org/docs/advanced-features/compiler#relay
+does not appear to generate types unless I have it misconfigured. It also does not appear to
+include a solution for `babel-plugin-relay` / the dev issue below. Using this options requires us
+to opt out of Babel and into SWC.
+
 ## Dev Issues
 
 Now start the server in dev:
@@ -64,4 +71,13 @@ Strange because the Node.js runtime should allow `fs`, though maybe hitting
 > The module you're trying to import uses Node.js specific modules, for example
 > `dns`, outside of `getStaticProps` / `getStaticPaths` / `getServerSideProps`
 
-Need to investigate more.
+Tracking in https://github.com/vercel/next.js/discussions/32502
+
+## Client Hydration
+
+Client hydration is not yet supported, see:
+
+- https://nextjs.org/docs/advanced-features/react-18/streaming#data-fetching
+- https://github.com/reactwg/react-18/discussions/22
+
+  > This API is not yet integrated with data fetching. The general Suspense mechanism should work, but we don't have a recommendation yet for how to transfer data from the server to the client to prepopulate the cache. We expect to provide more guidance on this in the future.
